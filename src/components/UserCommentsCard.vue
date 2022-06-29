@@ -6,7 +6,7 @@
       </h4>
     </div>
     <div class="row">
-      <div v-for="profileComment in profileComments" class="col-2 mb-3">
+      <div v-for="profileComment in profileComments" :key="profileComment.id" class="col-2 mb-3">
         <router-link :to="{ name: 'restaurant', params: { id: profileComment.id } }">
           <img v-bind:src="profileComment.Restaurant.image | emptyImage" width="100px" height="100px">
         </router-link>

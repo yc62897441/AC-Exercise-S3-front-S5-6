@@ -6,7 +6,7 @@
       </h4>
     </div>
     <div class="row">
-      <div v-for="profileFollower in profileFollowers" class="col-4 mb-3">
+      <div v-for="profileFollower in profileFollowers" :key="profileFollower.id" class="col-4 mb-3">
         <router-link :to="{ name: 'user', params: { id: profileFollower.id } }">
           <img v-bind:src="profileFollower.image | emptyImage" width="100px" height="100px">
         </router-link>

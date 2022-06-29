@@ -6,7 +6,8 @@
     </h1>
 
     <hr>
-    <div v-for="restaurant in restaurants" class="card mb-3" style="max-width: 540px;margin: auto;">
+    <div v-for="restaurant in restaurants" :key="restaurant.id" class="card mb-3"
+      style="max-width: 540px;margin: auto;">
       <div class="row no-gutters">
         <div class="col-md-4">
           <router-link :to="{ name: 'restaurant', params: { id: restaurant.id } }">

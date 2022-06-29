@@ -6,7 +6,8 @@
       </h4>
     </div>
     <div class="row">
-      <div v-for="profileFavoritedRestaurant in profileFavoritedRestaurants" class="col-2 mb-3">
+      <div v-for="profileFavoritedRestaurant in profileFavoritedRestaurants" :key="profileFavoritedRestaurant.id"
+        class="col-2 mb-3">
         <router-link :to="{ name: 'restaurant', params: { id: profileFavoritedRestaurant.id } }">
           <img v-bind:src="profileFavoritedRestaurant.image | emptyImage" width="100px" height="100px">
         </router-link>
