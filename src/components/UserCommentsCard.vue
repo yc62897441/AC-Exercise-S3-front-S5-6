@@ -23,7 +23,10 @@ export default {
   props: {
     profileComments: {
       type: Array,
-      required: true
+      required: true,
+      default: () => {
+        return []
+      }
     }
   }
 }

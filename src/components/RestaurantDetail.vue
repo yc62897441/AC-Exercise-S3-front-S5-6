@@ -33,17 +33,20 @@
         Dashboard
       </router-link>
 
-      <button v-if="restaurant.isFavorited" v-on:click="deleteFavorite" type="button"
-        class="btn btn-danger btn-border mx-2">
+      <button v-if="restaurant.isFavorited" v-on:click="deleteFavorite(restaurant.id)" :disabled="isProcessing"
+        type="button" class="btn btn-danger btn-border mx-2">
         移除最愛
       </button>
-      <button v-else v-on:click="addFavorite" type="button" class="btn btn-primary btn-border mx-2">
+      <button v-else v-on:click="addFavorite(restaurant.id)" :disabled="isProcessing" type="button"
+        class="btn btn-primary btn-border mx-2">
         加到最愛
       </button>
-      <button v-if="restaurant.isLiked" v-on:click="deleteLike" type="button" class="btn btn-danger like mx-2">
+      <button v-if="restaurant.isLiked" v-on:click="deleteLike(restaurant.id)" :disabled="isProcessing" type="button"
+        class="btn btn-danger like mx-2">
         Unlike
       </button>
-      <button v-else v-on:click="addLike" type="button" class="btn btn-primary like mx-2">
+      <button v-else v-on:click="addLike(restaurant.id)" :disabled="isProcessing" type="button"
+        class="btn btn-primary like mx-2">
         Like
       </button>
     </div>
@@ -52,6 +55,8 @@
 
 <script>
 import { emptyImage } from '../utils/mixins'
+import usersAPI from '../apis/users'
+import { Toast } from '../utils/helpers'
 
 export default {
   props: {
@@ -63,32 +68,133 @@ export default {
   mixins: [emptyImage],
   data() {
     return {
-      restaurant: this.initialRestaurant
+      restaurant: this.initialRestaurant,
+      isProcessing: false
+    }
+  },
+  watch: {
+    initialRestaurant(newValue) {
+      this.restaurant = {
+        ...this.restaurant,
+        ...newValue
+      }
     }
   },
   methods: {
-    addFavorite() {
-      this.restaurant = {
-        ...this.restaurant,
-        isFavorited: true
+    // addFavorite() {
+    //   this.restaurant = {
+    //     ...this.restaurant,
+    //     isFavorited: true
+    //   }
+    // },
+    // deleteFavorite() {
+    //   this.restaurant = {
+    //     ...this.restaurant,
+    //     isFavorited: false
+    //   }
+    // },
+    // addLike() {
+    //   this.restaurant = {
+    //     ...this.restaurant,
+    //     isLiked: true
+    //   }
+    // },
+    // deleteLike() {
+    //   this.restaurant = {
+    //     ...this.restaurant,
+    //     isLiked: false
+    //   }
+    // },
+    async addFavorite(restaurantId) {
+      try {
+        this.isProcessing = true
+
+        const { data } = await usersAPI.addFavorite({ restaurantId })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        this.restaurant = {
+          ...this.restaurant,
+          isFavorited: true
+        }
+
+        this.isProcessing = false
+      } catch (error) {
+        this.isProcessing = false
+        console.log('error', error)
+        Toast.fire({
+          icon: 'error',
+          title: '無法加入最愛，請稍後再試'
+        })
       }
     },
-    deleteFavorite() {
-      this.restaurant = {
-        ...this.restaurant,
-        isFavorited: false
+    async deleteFavorite(restaurantId) {
+      try {
+        this.isProcessing = true
+
+        const { data } = await usersAPI.deleteFavorite({ restaurantId })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+
+        this.restaurant = {
+          ...this.restaurant,
+          isFavorited: false
+        }
+
+        this.isProcessing = false
+      } catch (error) {
+        this.isProcessing = false
+        console.log('error', error)
+        Toast.fire({
+          icon: 'error',
+          title: '無法刪除最愛，請稍後再試'
+        })
       }
     },
-    addLike() {
-      this.restaurant = {
-        ...this.restaurant,
-        isLiked: true
+    async addLike(restaurantId) {
+      try {
+        this.isProcessing = true
+        const { data } = await usersAPI.addLike({ restaurantId })
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+        this.restaurant = {
+          ...this.restaurant,
+          isLiked: true
+        }
+        this.isProcessing = false
+      } catch (error) {
+        this.isProcessing = false
+        console.log('error', error)
+        Toast.fire({
+          icon: 'error',
+          title: '無法Like，請稍後再試'
+        })
       }
     },
-    deleteLike() {
-      this.restaurant = {
-        ...this.restaurant,
-        isLiked: false
+    async deleteLike(restaurantId) {
+      try {
+        this.isProcessing = true
+        const { data } = await usersAPI.deleteLike({ restaurantId })
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+        this.restaurant = {
+          ...this.restaurant,
+          isLiked: false
+        }
+        this.isProcessing = false
+      } catch (error) {
+        this.isProcessing = false
+        console.log('error', error)
+        Toast.fire({
+          icon: 'error',
+          title: '無法Dislike，請稍後再試'
+        })
       }
     },
   }

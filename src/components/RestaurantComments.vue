@@ -6,8 +6,8 @@
 
     <div v-for="comment in restaurantComments" :key="comment.id">
       <blockquote class="blockquote mb-0">
-        <button v-if="currentUser.isAdmin" v-on:click.prevent.stop="handleDeleteButtonClick(comment.id)" type="button"
-          class="btn btn-danger float-right">
+        <button v-if="currentUser.isAdmin" v-on:click.prevent.stop="handleDeleteButtonClick(comment.id)"
+          :disabled="isProcessing" type="button" class="btn btn-danger float-right">
           Delete
         </button>
         <h3>
@@ -28,6 +28,7 @@
 
 <script>
 import { fromNowFilter } from '../utils/mixins'
+import { mapState } from 'vuex'
 
 const dummyUser = {
   currentUser: {
@@ -45,13 +46,20 @@ export default {
     restaurantComments: {
       type: Array,
       required: true
+    },
+    isProcessing: {
+      type: Boolean,
+      default: false
     }
   },
   mixins: [fromNowFilter],
   data() {
     return {
-      currentUser: dummyUser.currentUser
+      // currentUser: dummyUser.currentUser
     }
+  },
+  computed: {
+    ...mapState(['currentUser'])
   },
   methods: {
     handleDeleteButtonClick(commentId) {

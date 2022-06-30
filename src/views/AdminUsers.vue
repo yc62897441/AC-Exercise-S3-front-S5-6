@@ -28,11 +28,12 @@
           <td>{{ user.email }}</td>
           <td>{{ user.isAdmin | isAdmin }}</td>
           <td v-if="user.id !== currentUser.id">
-            <button v-if="user.isAdmin" v-on:click.prevent.stop="toggleUserRole(user.id)" type="button"
-              class="btn btn-link">
+            <button v-if="user.isAdmin" v-on:click.prevent.stop="toggleUserRole(user.id)" :disabled="isProcessing"
+              type="button" class="btn btn-link">
               set as user
             </button>
-            <button v-else v-on:click.prevent.stop="toggleUserRole(user.id)" type="button" class="btn btn-link">
+            <button v-else v-on:click.prevent.stop="toggleUserRole(user.id)" :disabled="isProcessing" type="button"
+              class="btn btn-link">
               set as admin
             </button>
           </td>
@@ -44,6 +45,10 @@
 
 <script>
 import AdminNav from '../components/AdminNav'
+import { mapState } from 'vuex'
+import adminAPI from '../apis/admin'
+import { Toast } from '../utils/helpers'
+
 
 const dummyData = {
   "users": [
@@ -1239,34 +1244,88 @@ export default {
   data() {
     return {
       users: [],
-      currentUser: {}
+      // currentUser: {},
+      isProcessing: false
     }
   },
   methods: {
-    fetchUsers() {
-      this.users = dummyData.users
-    },
-    fetchCurrentUser() {
-      this.currentUser = {
-        ...dummyUser.profile
+    // fetchUsers() {
+    //   this.users = dummyData.users
+    // },
+    // fetchCurrentUser() {
+    //   this.currentUser = {
+    //     ...dummyUser.profile
+    //   }
+    // },
+    // toggleUserRole(userId) {
+    //   this.users = this.users.map(user => {
+    //     if (user.id === userId) {
+    //       return {
+    //         ...user,
+    //         isAdmin: !user.isAdmin
+    //       }
+    //     } else {
+    //       return user
+    //     }
+    //   })
+    // },
+    async fetchUsers() {
+      try {
+        const { data } = await adminAPI.users.get()
+        this.users = data.users
+      } catch (error) {
+        console.log('error', error)
+        Toast.fire({
+          icon: 'error',
+          title: '無法取得使用者資料，請稍後再試'
+        })
       }
     },
-    toggleUserRole(userId) {
-      this.users = this.users.map(user => {
-        if (user.id === userId) {
-          return {
-            ...user,
-            isAdmin: !user.isAdmin
+    async toggleUserRole(userId) {
+      try {
+        this.isProcessing = true
+        let isAdmin = false
+        this.users.forEach(user => {
+          if (user.id === userId) {
+            isAdmin = !user.isAdmin
           }
-        } else {
-          return user
+        })
+        console.log('isAdmin', isAdmin)
+        isAdmin = isAdmin.toString()
+        console.log('isAdmin', isAdmin)
+        const { data } = await adminAPI.users.update({ userId, isAdmin })
+
+        if (data.status !== 'success') {
+          throw new Error(data.message)
         }
-      })
+
+        this.users = this.users.map(user => {
+          if (user.id === userId) {
+            return {
+              ...user,
+              isAdmin: !user.isAdmin
+            }
+          } else {
+            return user
+          }
+        })
+        this.isProcessing = false
+      } catch (error) {
+        this.isProcessing = false
+        console.log('error', error)
+        Toast.fire({
+          icon: 'error',
+          title: '無法更新使用者角色，請稍後再試'
+        })
+      }
     }
+  },
+  computed: {
+    ...mapState(['currentUser'])
   },
   created() {
     this.fetchUsers()
-    this.fetchCurrentUser()
+    // this.fetchCurrentUser()
   },
   filters: {
     isAdmin(isAdmin) {

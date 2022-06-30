@@ -34,8 +34,22 @@
   </nav>
 </template>
 
-<script>
 
+
+<script>
+import { mapState } from 'vuex'
+
+export default {
+    computed: {
+    ...mapState(['currentUser', 'isAuthenticated'])
+  }
+}
+</script>
+
+
+<!-- 使用 Vuex 之前的寫法 -->
+<!-- 
+<script>
 const dummyUser = {
   currentUser: {
     id: 1,
@@ -73,5 +87,4 @@ export default {
     }
   }
 }
-
-</script>
+</script> -->

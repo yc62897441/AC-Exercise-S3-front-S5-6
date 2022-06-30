@@ -77,7 +77,7 @@ export default {
         })
 
         const { data } = response
-        
+
         // 伺服器回傳登入驗證錯誤
         if (data.status !== 'success') {
           throw new Error(data.message)
@@ -86,6 +86,10 @@ export default {
         // 登入驗證成功
         // 儲存 token 到瀏覽器內 
         localStorage.setItem('token', data.token)
+
+        // 將資料傳到 Vuex 中
+        this.$store.commit('setCurrentUser', data.user)
+
         // 跳轉回 /restaurants
         this.$router.push('/restaurants')
 

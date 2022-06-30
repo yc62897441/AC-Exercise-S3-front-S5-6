@@ -121,7 +121,7 @@ export default {
     // },
     async fetchRestaurant(restaurantId) {
       try {
-        const { data } = await restaurantsAPI.getDashboard({ restaurantId })
+        const { data } = await restaurantsAPI.getRestaurant({ restaurantId })
         this.restaurant = data.restaurant
       } catch (error) {
         console.log('error', error)

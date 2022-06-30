@@ -2,7 +2,7 @@
   <div class="container py-5">
     <div class="row">
       <!-- UserProfileCard -->
-      <UserProfileCard v-bind:profile="profile" />
+      <UserProfileCard v-bind:profile="profile" v-bind:currentUser="currentUser" />
     </div>
     <div class="row">
       <div class="col-4">
@@ -31,6 +31,9 @@ import UserFollowingsCard from '../components/UserFollowingsCard'
 import UserFollowersCard from '../components/UserFollowersCard'
 import UserCommentsCard from '../components/UserCommentsCard'
 import UserFavoritedRestaurantsCard from '../components/UserFavoritedRestaurantsCard'
+import { mapState } from 'vuex'
+import usersAPI from '../apis/users'
+import { Toast } from '../utils/helpers'
 
 const dummyData = {
   'profile': {
@@ -1253,13 +1256,38 @@ export default {
       profile: {}
     }
   },
+  computed: {
+    ...mapState(['currentUser'])
+  },
   methods: {
-    fetchProfile() {
-      this.profile = dummyData.profile
+    // fetchProfile() {
+    //   this.profile = dummyData.profile
+    // },
+    async fetchUser(userId) {
+      try {
+        const { data } = await usersAPI.get({ userId })
+        console.log('data', data)
+        this.profile = data.profile
+      } catch (error) {
+        console.log('error', error)
+        Toast.fire({
+          icon: 'error',
+          title: '無法取得 User 資料，請稍後再試'
+        })
+      }
     }
   },
-  created() {
-    this.fetchProfile()
+  mounted() {
+    const { id: userId } = this.$route.params
+    this.fetchUser(userId)
+  },
+  // created() {
+  //   this.fetchProfile()
+  // },
+  beforeRouteUpdate(to, from, next) {
+    const { id: userId } = to.params
+    this.fetchUser(userId)
+    next()
   }
 }
 

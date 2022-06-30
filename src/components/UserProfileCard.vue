@@ -19,10 +19,22 @@
         <!-- <button type="button" class="btn btn-primary mx-3">
           編輯
         </button> -->
-        <router-link v-if="currentUser.id === profile.id" :to="{ name: 'user-edit', params: { id: 1 } }"
-          class="btn btn-primary mx-3">
-          編輯
-        </router-link>
+        <template v-if="isCurrentUser">
+          <router-link v-if="currentUser.id === profile.id" :to="{ name: 'user-edit', params: { id: currentUser.id } }"
+            class="btn btn-primary">
+            編輯
+          </router-link>
+        </template>
+        <template v-else>
+          <button v-if="isFollowing" v-on:click="unFollowUser(profile.id)" :disabled="isProcessing" type="button"
+            class="btn btn-danger">
+            取消追蹤
+          </button>
+          <button v-else v-on:click="followUser(profile.id)" :disabled="isProcessing" type="button"
+            class="btn btn-primary">
+            追蹤
+          </button>
+        </template>
         <button type="button" class="btn btn-link" @click="$router.back()">
           回上一頁
         </button>
@@ -33,6 +45,9 @@
 
 <script>
 import { emptyImage } from './../utils/mixins'
+import usersAPI from '../apis/users'
+import { Toast } from '../utils/helpers'
+
 const dummyUser = {
   currentUser: {
     id: 1,
@@ -49,24 +64,90 @@ export default {
   props: {
     profile: {
       type: Object,
+      required: true,
+      default: () => {
+        return {}
+      }
+    },
+    currentUser: {
+      type: Object,
+      required: true
+    },
+    isAuthenticated: {
+      type: Boolean,
       required: true
     }
   },
   data() {
     return {
-      currentUser: {}
+      // currentUser: {},
+      isProcessing: false
     }
   },
   methods: {
-    fetchCurrentUser() {
-      this.currentUser = {
-        ...dummyUser.currentUser,
-        isAuthenticated: dummyUser.isAuthenticated
+    // fetchCurrentUser() {
+    //   this.currentUser = {
+    //     ...dummyUser.currentUser,
+    //     isAuthenticated: dummyUser.isAuthenticated
+    //   }
+    // },
+    async followUser(userId) {
+      try {
+        this.isProcessing = true
+        const { data } = await usersAPI.addFollowing({ userId })
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+        this.profile.Followers.push({ id: this.currentUser.id })
+        this.isProcessing = false
+      } catch (error) {
+        this.isProcessing = false
+        console.log('error', error)
+        Toast.fire({
+          icon: 'error',
+          title: '無法加入追蹤，請稍後再試'
+        })
       }
+    },
+    async unFollowUser(userId) {
+      try {
+        this.isProcessing = true
+        const { data } = await usersAPI.deleteFollowing({ userId })
+        if (data.status !== 'success') {
+          throw new Error(data.message)
+        }
+        this.profile.Followers = this.profile.Followers.map(follower => follower.id !== this.currentUser.id)
+        this.isProcessing = false
+      } catch (error) {
+        this.isProcessing = false
+        console.log('error', error)
+        Toast.fire({
+          icon: 'error',
+          title: '無法取消追蹤，請稍後再試'
+        })
+      }
+    },
+  },
+  computed: {
+    isFollowing() {
+      let isFollowing = false
+      this.profile.Followers.forEach(follower => {
+        if (follower.id === this.currentUser.id) {
+          isFollowing = true
+        }
+      })
+      return isFollowing
+    },
+    isCurrentUser() {
+      let isCurrentUser = false
+      if (this.profile.id === this.currentUser.id) {
+        isCurrentUser = true
+      }
+      return isCurrentUser
     }
   },
   created() {
-    this.fetchCurrentUser()
+    // this.fetchCurrentUser()
   }
 }
 </script>

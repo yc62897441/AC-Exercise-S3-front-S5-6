@@ -23,7 +23,10 @@ export default {
   props: {
     profileFollowings: {
       type: Array,
-      required: true
+      required: true,
+      default: () => {
+        return []
+      }
     }
   }
 }
