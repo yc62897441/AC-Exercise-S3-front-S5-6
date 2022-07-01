@@ -18,3 +18,10 @@ export default {
   }
 }
 </script>
+
+<!-- 撰寫的樣式只在某個元件有作用、而不想影響其他元件時，可以在該組建的 <style> 標籤中加上 scoped 屬性 -->
+<style scoped>
+  main {
+    margin-top: 65px !important;
+  }
+</style>

@@ -77,6 +77,7 @@ export default {
         })
 
         const { data } = response
+        console.log('data', data)
 
         // 伺服器回傳登入驗證錯誤
         if (data.status !== 'success') {

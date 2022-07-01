@@ -14,7 +14,8 @@ export default new Vuex.Store({
       image: '',
       isAdmin: false
     },
-    isAuthenticated: false
+    isAuthenticated: false,
+    token: ''
   },
   getters: {
   },
@@ -28,6 +29,15 @@ export default new Vuex.Store({
       }
       // 將使用者的登入狀態改為 true
       state.isAuthenticated = true
+      // 將使用者驗證用的 token 儲存在 state 中
+      state.token = localStorage.getItem('token')
+    },
+    revokeAuthentication(state) {
+      state.currentUser = {}
+      state.isAuthenticated = false
+      // 登出時一併將 state 內的 token 移除
+      state.token = ''
+      localStorage.removeItem('token')
     }
   },
   // 設定其他的非同步函式，例如發送 API 請求等等
@@ -37,9 +47,11 @@ export default new Vuex.Store({
         const { data } = await usersAPI.getCurrentUser()
         const { id, name, email, image, isAdmin } = data
         commit('setCurrentUser', { id, name, email, image, isAdmin })
+        return true
       } catch (error) {
         console.log('error', error)
         console.error('can not fetch user information')
+        return false
       }
     }
   },

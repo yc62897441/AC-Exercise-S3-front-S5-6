@@ -15,19 +15,20 @@
         </p>
       </div>
       <div class="card-footer">
-        <button v-if="restaurant.isFavorited" v-on:click.prevent.stop="deleteFavorite(restaurant.id)" type="button"
-          class="btn btn-danger btn-border favorite mx-2">
+        <button v-if="restaurant.isFavorited" v-on:click.prevent.stop="deleteFavorite(restaurant.id)"
+          :disabled="idProcessing" type="button" class="btn btn-danger btn-border favorite mx-2">
           移除最愛
         </button>
-        <button v-else v-on:click.prevent.stop="addFavorite(restaurant.id)" type="button"
+        <button v-else v-on:click.prevent.stop="addFavorite(restaurant.id)" :disabled="idProcessing" type="button"
           class="btn btn-primary btn-border favorite mx-2">
           加到最愛
         </button>
-        <button v-if="restaurant.isLiked" v-on:click.prevent.stop="deleteLike(restaurant.id)" type="button"
-          class="btn btn-danger like mx-2">
+        <button v-if="restaurant.isLiked" v-on:click.prevent.stop="deleteLike(restaurant.id)" :disabled="idProcessing"
+          type="button" class="btn btn-danger like mx-2">
           Unlike
         </button>
-        <button v-else type="button" v-on:click.prevent.stop="addLike(restaurant.id)" class="btn btn-primary like mx-2">
+        <button v-else type="button" v-on:click.prevent.stop="addLike(restaurant.id)" :disabled="idProcessing"
+          class="btn btn-primary like mx-2">
           Like
         </button>
       </div>
@@ -50,7 +51,8 @@ export default {
   mixins: [emptyImage],
   data() {
     return {
-      restaurant: this.initialRestaurant
+      restaurant: this.initialRestaurant,
+      idProcessing: false
     }
   },
   methods: {
@@ -80,6 +82,7 @@ export default {
     // },
     async addFavorite(restaurantId) {
       try {
+        this.idProcessing = true
         const { data } = await usersAPI.addFavorite({ restaurantId })
 
         if (data.status !== 'success') {
@@ -90,7 +93,9 @@ export default {
           ...this.restaurant,
           isFavorited: true
         }
+        this.idProcessing = false
       } catch (error) {
+        this.idProcessing = false
         console.log(error)
         Toast.fire({
           icon: 'error',
@@ -100,6 +105,7 @@ export default {
     },
     async deleteFavorite(restaurantId) {
       try {
+        this.idProcessing = true
         const { data } = await usersAPI.deleteFavorite({ restaurantId })
 
         if (data.status !== 'success') {
@@ -110,7 +116,9 @@ export default {
           ...this.restaurant,
           isFavorited: false
         }
+        this.idProcessing = false
       } catch (error) {
+        this.idProcessing = false
         console.log(error)
         Toast.fire({
           icon: 'error',
@@ -120,6 +128,7 @@ export default {
     },
     async addLike(restaurantId) {
       try {
+        this.idProcessing = true
         const { data } = await usersAPI.addLike({ restaurantId })
         if (data.status !== 'success') {
           throw new Error(data.message)
@@ -128,7 +137,9 @@ export default {
           ...this.restaurant,
           isLiked: true
         }
+        this.idProcessing = false
       } catch (error) {
+        this.idProcessing = false
         console.log('error', error)
         Toast.fire({
           icon: 'error',
@@ -138,6 +149,7 @@ export default {
     },
     async deleteLike(restaurantId) {
       try {
+        this.idProcessing = true
         const { data } = await usersAPI.deleteLike({ restaurantId })
         if (data.status !== 'success') {
           throw new Error(data.message)
@@ -146,7 +158,9 @@ export default {
           ...this.restaurant,
           isLiked: false
         }
+        this.idProcessing = false
       } catch (error) {
+        this.idProcessing = false
         console.log('error', error)
         Toast.fire({
           icon: 'error',
@@ -157,3 +171,35 @@ export default {
   }
 }
 </script>
+
+<style scoped>
+
+.badge.badge-secondary {
+  padding: 0;
+  margin: 8px 0;
+  color: #bd2333;
+  background-color: transparent;
+}
+
+.btn,
+.btn-border.btn:hover {
+  margin: 7px 14px 7px 0;
+}
+
+.card {
+  margin-bottom: 2rem !important;
+}
+.card-img-top {
+  background-color: #EFEFEF;
+}
+
+.card-body {
+  padding: 17.5px;
+}
+
+.card-footer {
+  padding: 9px 17.5px;
+  border-color: rgb(232, 232, 232);
+  background: white;
+}
+</style>
